@@ -1,11 +1,36 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { InAnimeType, OutAnimeType } from '../../components/controllerView';
+import { myAnime } from '../../utils/myAnimeObj';
+
+const inAnimeMap = {
+  no: {},
+  scaleUp: {
+    scale: [1, 4],
+  },
+  shift: {
+    translateY: [-20, 0],
+    opacity: [0, 1],
+  },
+  contract: {
+    translateX: [20, 0],
+    opacity: [0, 1],
+  },
+};
+
+const outAnimeMap = {
+  no: {},
+  glossyBlur: {
+    filter: ['blur(0)', 'blur(4px)'],
+    scale: [1, 4],
+    opacity: [1, 0],
+  },
+};
 
 interface AnimeState {
   type?: string;
   inAnime?: InAnimeType;
   outAnime?: OutAnimeType;
-  duration?: number;
+  duration: number;
   inDuration?: number;
   outDuration?: number;
   progress?: number;
@@ -18,16 +43,17 @@ const initialState: AnimeState = {
   duration: 2,
   inDuration: 1,
   outDuration: 1,
+  progress: 0,
 };
 
 export const animeStateSlice = createSlice({
   name: 'animeState',
   initialState,
   reducers: {
-    updateParams: (state, action) => {
+    updateType: (state, action) => {
       const textWrapper = document.querySelector('.word-dom');
 
-      if (action.payload.type === 'text') {
+      if (action.payload === 'text') {
         textWrapper.innerHTML = textWrapper.textContent.replace(
           /\S/g,
           "<span class='letter'>$&</span>"
@@ -40,17 +66,76 @@ export const animeStateSlice = createSlice({
         });
         textWrapper.innerText = str;
       }
-
-      state.type = action.payload.type || state.type;
-      state.inAnime = action.payload.inAnime || state.inAnime;
-      state.outAnime = action.payload.outAnime || state.outAnime;
-      state.duration = action.payload.duration || state.duration;
-      state.inDuration = action.payload.inDuration || state.inDuration;
-      state.outDuration = action.payload.outDuration || state.outDuration;
+      state.type = action.payload;
+    },
+    updateInAnime: (state, action) => {
+      state.inAnime = action.payload;
+      const addParams = inAnimeMap[action.payload];
+      const instance = myAnime.updateAnimeInstance({
+        targets: state.type === 'text' ? '.letters' : '.word-dom',
+        autoplay: false,
+        duration: state.duration * 1000,
+        easing: 'linear',
+      });
+      if (state.outAnime !== 'no') {
+        instance.add(addParams).add(outAnimeMap[state.outAnime]);
+      } else {
+        instance.add(addParams);
+      }
+    },
+    updateOutAnime: (state, action) => {
+      state.outAnime = action.payload;
+      const addParams = outAnimeMap[action.payload];
+      const instance = myAnime.updateAnimeInstance({
+        targets: state.type === 'text' ? '.letters' : '.word-dom',
+        autoplay: false,
+        duration: state.duration * 1000,
+        easing: 'linear',
+      });
+      if (state.inAnime !== 'no') {
+        instance.add(inAnimeMap[state.inAnime]).add(addParams);
+      } else {
+        instance.add(addParams);
+      }
+    },
+    updateDuration: (state, action) => {
+      state.duration = action.payload;
+      const instance = myAnime.updateAnimeInstance({
+        targets: state.type === 'text' ? '.letters' : '.word-dom',
+        autoplay: false,
+        duration: state.duration * 1000,
+        easing: 'linear',
+      });
+      if (state.inAnime !== 'no') {
+        instance.add(inAnimeMap[state.inAnime]);
+      }
+      if (state.outAnime !== 'no') {
+        instance.add(outAnimeMap[state.outAnime]);
+      }
+      if (state.inAnime !== 'no' && state.outAnime !== 'no') {
+        instance
+          .add(inAnimeMap[state.inAnime])
+          .add(outAnimeMap[state.outAnime]);
+      }
+    },
+    resetAnime(state) {
+      state.type = initialState.type;
+      state.inAnime = initialState.inAnime;
+      state.outAnime = initialState.outAnime;
+      state.duration = initialState.duration;
+      state.inDuration = initialState.inDuration;
+      state.outDuration = initialState.outDuration;
+      myAnime.reset();
     },
   },
 });
 
-export const { updateParams } = animeStateSlice.actions;
+export const {
+  updateType,
+  updateInAnime,
+  updateOutAnime,
+  updateDuration,
+  resetAnime,
+} = animeStateSlice.actions;
 
 export default animeStateSlice.reducer;

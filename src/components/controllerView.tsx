@@ -1,73 +1,66 @@
 import { Button, InputNumber, Select } from 'antd';
-import { useForm } from 'antd/es/form/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
-import { updateParams } from '../features/anime/animeSlice';
+import {
+  updateType,
+  updateInAnime,
+  updateOutAnime,
+  updateDuration,
+  resetAnime,
+} from '../features/anime/animeSlice';
+import { myAnime } from '../utils/myAnimeObj';
 
 export type InAnimeType = 'scaleUp' | 'shift' | 'contract' | 'no';
 export type OutAnimeType = 'glossyBlur' | 'no';
 
 const ControllerView = () => {
-  const [form] = useForm();
-  const [play, setPlay] = useState(false);
-  const animeState = useSelector((state) => state);
-  console.log(animeState);
+  const { type, inAnime, outAnime, duration } = useSelector(
+    (state) => state.animeStore
+  );
 
   const dispatch = useDispatch();
 
   const onTypeChange = (v: 'text' | 'word') => {
-    dispatch(updateParams({ type: v }));
+    dispatch(updateType(v));
   };
 
   const onInAnime = (v: InAnimeType) => {
-    dispatch(updateParams({ inAnime: v }));
-    // switch (v) {
-    //   case 'scaleUp':
-    //     myAnime.updateAnimeParams({ inAnime: { scale: [0, 4] } });
-    //     break;
-    //   case 'shift':
-    //     myAnime.updateAnimeParams({ inAnime: { scale: [0, 4] } });
-    //     break;
-    //   case 'contract':
-    //     myAnime.updateAnimeParams({ inAnime: { scale: [0, 4] } });
-    //     break;
-    //   case 'glossyBlur':
-    //     myAnime.updateAnimeParams({ inAnime: { scale: [0, 4] } });
-    //     break;
-    //   default:
-    //     myAnime.updateAnimeParams({ inAnime: undefined });
-    //     break;
-    // }
+    dispatch(updateInAnime(v));
   };
 
   const onOutAnime = (v: OutAnimeType) => {
-    dispatch(updateParams({ outAnime: v }));
+    dispatch(updateOutAnime(v));
   };
 
-  const onDuration = (v: number | null) => {
-    dispatch(updateParams({ duration: v }));
+  const onDuration = (v: number) => {
+    dispatch(updateDuration(v));
   };
 
-  const onStart = () => {};
+  const onStart = () => {
+    myAnime.play();
+  };
+
+  const onReset = () => {
+    dispatch(resetAnime());
+  };
 
   return (
     <div className="p-4 border flex flex-col gap-y-4">
       <div>
         <span>动画目标：</span>
         <Select
-          defaultValue="word"
+          value={type}
           onChange={onTypeChange}
           style={{ width: 120 }}
           options={[
-            { value: 'text', label: '文字' },
             { value: 'word', label: '单词' },
+            { value: 'text', label: '文字' },
           ]}
         />
       </div>
       <div>
         <span>入场动画：</span>
         <Select
-          defaultValue={'no'}
+          value={inAnime}
           onChange={onInAnime}
           style={{ width: 120 }}
           options={[
@@ -82,7 +75,7 @@ const ControllerView = () => {
         <span>出场动画：</span>
         <Select
           onChange={onOutAnime}
-          defaultValue={'no'}
+          value={outAnime}
           style={{ width: 120 }}
           options={[
             { value: 'no', label: '无' },
@@ -94,7 +87,7 @@ const ControllerView = () => {
         <span>动画时长：</span>
         <InputNumber
           onChange={onDuration}
-          defaultValue={2}
+          value={duration}
           addonAfter={'s'}
           min={0}
           style={{ width: 120 }}
@@ -121,9 +114,9 @@ const ControllerView = () => {
 
       <div className="space-x-4">
         <Button htmlType="submit" onClick={onStart}>
-          {play ? '暂停' : '播放'}
+          {'播放'}
         </Button>
-        <Button onClick={() => form.resetFields()}>重置</Button>
+        <Button onClick={onReset}>重置</Button>
       </div>
     </div>
   );
