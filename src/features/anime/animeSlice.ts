@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { InAnimeType, OutAnimeType } from '../../components/controllerView';
+import { InAnimeType, OutAnimeType } from '../../components/ControllerView';
 import { myAnime } from '../../utils/myAnimeObj';
 
 const inAnimeMap = {
@@ -37,7 +37,7 @@ interface AnimeState {
 }
 
 const initialState: AnimeState = {
-  type: 'word',
+  type: '.word-dom',
   inAnime: 'no',
   outAnime: 'no',
   duration: 2,
@@ -51,78 +51,77 @@ export const animeStateSlice = createSlice({
   initialState,
   reducers: {
     updateType: (state, action) => {
-      // TODO 动画的 target 应该从实例中获取
-      // TODO 一般情况下不直接使用 DOM 的查询 API
-      const textWrapper = document.querySelector('.word-dom');
-
-      if (action.payload === 'text') {
-        // TODO 内容的更新应该内置于动画实例
-        textWrapper.innerHTML = textWrapper.textContent.replace(
-          /\S/g,
-          "<span class='letter'>$&</span>"
-        );
-      } else {
-        // TODO 同上
-        const letters = document.querySelectorAll('.letter');
-        let str = '';
-        letters.forEach((letter) => {
-          str += letter.innerText;
-        });
-        textWrapper.innerText = str;
-      }
       state.type = action.payload;
+      myAnime.setViewClass(action.payload as string);
+      myAnime.createAnimation();
     },
     updateInAnime: (state, action) => {
       state.inAnime = action.payload;
-      const addParams = inAnimeMap[action.payload];
+      myAnime.setIntroName(action.payload as string);
+      myAnime.createAnimation();
+
+      // const addParams = inAnimeMap[action.payload];
 
       // TODO 外部不应该直接获取实际的动画实例，而是应该由 myAnime 代理
-      const instance = myAnime.updateAnimeInstance({
-        targets: state.type === 'text' ? '.letters' : '.word-dom',
-        autoplay: false,
-        duration: state.duration * 1000,
-        easing: 'linear',
-      });
-      if (state.outAnime !== 'no') {
-        instance.add(addParams).add(outAnimeMap[state.outAnime]);
-      } else {
-        instance.add(addParams);
-      }
+      // const instance = myAnime.updateAnimeInstance({
+      //   targets: state.type === 'text' ? '.letters' : '.word-dom',
+      //   autoplay: false,
+      //   duration: state.duration * 1000,
+      //   easing: 'linear',
+      // });
+      // if (state.outAnime !== 'no') {
+      //   instance.add(addParams).add(outAnimeMap[state.outAnime]);
+      // } else {
+      //   instance.add(addParams);
+      // }
     },
     updateOutAnime: (state, action) => {
       state.outAnime = action.payload;
-      const addParams = outAnimeMap[action.payload];
-      const instance = myAnime.updateAnimeInstance({
-        targets: state.type === 'text' ? '.letters' : '.word-dom',
-        autoplay: false,
-        duration: state.duration * 1000,
-        easing: 'linear',
-      });
-      if (state.inAnime !== 'no') {
-        instance.add(inAnimeMap[state.inAnime]).add(addParams);
-      } else {
-        instance.add(addParams);
-      }
+      myAnime.setOutroName(action.payload as string);
+      myAnime.createAnimation();
+
+      // const addParams = outAnimeMap[action.payload];
+      // const instance = myAnime.updateAnimeInstance({
+      //   targets: state.type === 'text' ? '.letters' : '.word-dom',
+      //   autoplay: false,
+      //   duration: state.duration * 1000,
+      //   easing: 'linear',
+      // });
+      // if (state.inAnime !== 'no') {
+      //   instance.add(inAnimeMap[state.inAnime]).add(addParams);
+      // } else {
+      //   instance.add(addParams);
+      // }
     },
     updateDuration: (state, action) => {
-      state.duration = action.payload;
-      const instance = myAnime.updateAnimeInstance({
-        targets: state.type === 'text' ? '.letters' : '.word-dom',
-        autoplay: false,
-        duration: state.duration * 1000,
-        easing: 'linear',
-      });
-      if (state.inAnime !== 'no') {
-        instance.add(inAnimeMap[state.inAnime]);
-      }
-      if (state.outAnime !== 'no') {
-        instance.add(outAnimeMap[state.outAnime]);
-      }
-      if (state.inAnime !== 'no' && state.outAnime !== 'no') {
-        instance
-          .add(inAnimeMap[state.inAnime])
-          .add(outAnimeMap[state.outAnime]);
-      }
+      const totalDuration = state.inDuration + state.outDuration;
+      const dura = action.payload ? action.payload : initialState.duration;
+      state.duration = dura;
+      state.inDuration = dura * (state.inDuration / totalDuration);
+      state.outDuration = dura * (state.outDuration / totalDuration);
+      myAnime.setDuration(action.payload * 1000);
+      myAnime.setIntroDuration(state.inDuration * 1000);
+      myAnime.setOutroDuration(state.outDuration * 1000);
+      myAnime.createAnimation();
+    },
+    updateInDuration: (state, action) => {
+      const dura = action.payload ? action.payload : initialState.inDuration;
+      state.inDuration = dura;
+      state.duration = dura + state.outDuration;
+      myAnime.setDuration(state.duration * 1000);
+      myAnime.setIntroDuration(dura * 1000);
+      myAnime.createAnimation();
+    },
+    updateOutDuration: (state, action) => {
+      const dura = action.payload ? action.payload : initialState.inDuration;
+      state.outDuration = dura;
+      state.duration = dura + state.inDuration;
+      myAnime.setDuration(state.duration * 1000);
+      myAnime.setOutroDuration(dura * 1000);
+      myAnime.createAnimation();
+    },
+    updateProgress: (state, action) => {
+      state.progress = action.payload;
     },
     resetAnime(state) {
       state.type = initialState.type;
@@ -131,6 +130,7 @@ export const animeStateSlice = createSlice({
       state.duration = initialState.duration;
       state.inDuration = initialState.inDuration;
       state.outDuration = initialState.outDuration;
+      state.progress = initialState.progress;
       myAnime.reset();
     },
   },
@@ -141,6 +141,9 @@ export const {
   updateInAnime,
   updateOutAnime,
   updateDuration,
+  updateProgress,
+  updateInDuration,
+  updateOutDuration,
   resetAnime,
 } = animeStateSlice.actions;
 
