@@ -5,6 +5,7 @@ class MyAnime {
   myAnime;
 
   constructor() {
+    // TODO 没有存储 anime 的必要
     this.myAnime = anime;
     this.myAnimeInstance = this.myAnime.timeline({
       autoplay: false,
@@ -41,6 +42,28 @@ class MyAnime {
       duration: 2,
     });
   }
+
+  setIntroDuration(duration: number): void {}
+
+  getIntroDuration(): number {}
+
+  setOutroDuration(duration: number): void {}
+
+  getOutroDuration(): number {}
+
+  setIntroName(name: string): void {}
+
+  getIntroName(): string {}
+
+  setOutroName(name: string): void {}
+
+  getOutroName(): string {}
+
+  createView(): HTMLDivElement {}
+
+  createAnimation(): anime.AnimeTimelineInstance {}
+
+  currentProgress(): number {}
 }
 
 export default MyAnime;

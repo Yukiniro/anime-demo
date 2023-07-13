@@ -3,6 +3,8 @@ import MyAnime from '../utils/myAnime';
 //  a. 入场：scale up，shift，contract
 // b. 出场：glossy blur
 
+
+// TODO 组件文件名和组件名保持一致，首字母大写
 const AnimateText = () => {
   const textRef = useRef<MyAnime>();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);

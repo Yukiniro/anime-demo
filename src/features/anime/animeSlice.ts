@@ -51,14 +51,18 @@ export const animeStateSlice = createSlice({
   initialState,
   reducers: {
     updateType: (state, action) => {
+      // TODO 动画的 target 应该从实例中获取
+      // TODO 一般情况下不直接使用 DOM 的查询 API
       const textWrapper = document.querySelector('.word-dom');
 
       if (action.payload === 'text') {
+        // TODO 内容的更新应该内置于动画实例
         textWrapper.innerHTML = textWrapper.textContent.replace(
           /\S/g,
           "<span class='letter'>$&</span>"
         );
       } else {
+        // TODO 同上
         const letters = document.querySelectorAll('.letter');
         let str = '';
         letters.forEach((letter) => {
@@ -71,6 +75,8 @@ export const animeStateSlice = createSlice({
     updateInAnime: (state, action) => {
       state.inAnime = action.payload;
       const addParams = inAnimeMap[action.payload];
+
+      // TODO 外部不应该直接获取实际的动画实例，而是应该由 myAnime 代理
       const instance = myAnime.updateAnimeInstance({
         targets: state.type === 'text' ? '.letters' : '.word-dom',
         autoplay: false,
