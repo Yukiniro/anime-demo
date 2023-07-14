@@ -1,10 +1,10 @@
 import './App.css';
-import AnimeView from './components/AnimeView';
-import ControllerView from './components/ControllerView';
 import { useEffect, useRef } from 'react';
 import { myAnime } from './utils/myAnimeObj';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProgress } from './features/anime/animeSlice';
+import ControllerView from './components/ControllerView';
+import AnimeView from './components/AnimeView';
 
 function App() {
   const dispatch = useDispatch();

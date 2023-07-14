@@ -1,4 +1,4 @@
-import { Button, InputNumber, Select } from 'antd';
+import { InputNumber, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   updateType,
