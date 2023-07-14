@@ -76,7 +76,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   };
 
   return (
-    <div className="p-4 border flex flex-col gap-y-4">
+    <div className="p-4 flex flex-col gap-y-4">
       <div className="flex justify-between">
         <span>动画目标：</span>
         <Select
@@ -84,8 +84,8 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
           onChange={onTypeChange}
           style={{ width: 120 }}
           options={[
-            { value: '.word-dom', label: '单词' },
-            { value: '.text-dom', label: '文字' },
+            { value: 'word', label: '单词' },
+            { value: 'text', label: '文字' },
           ]}
         />
       </div>
@@ -147,10 +147,18 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
       </div>
 
       <div className="space-x-4">
-        <Button htmlType="submit" onClick={onStart}>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded"
+          onClick={onStart}
+        >
           {isPlay ? '暂停' : '播放'}
-        </Button>
-        <Button onClick={onReset}>重置</Button>
+        </button>
+        <button
+          className="bg-white hover:bg-gray-100 text-gray-800 py-1 px-4 border border-gray-400 rounded shadow"
+          onClick={onReset}
+        >
+          重置
+        </button>
       </div>
     </div>
   );

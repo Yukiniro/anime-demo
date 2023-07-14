@@ -2,32 +2,14 @@ import { createSlice } from '@reduxjs/toolkit';
 import { InAnimeType, OutAnimeType } from '../../components/ControllerView';
 import { myAnime } from '../../utils/myAnimeObj';
 
-const inAnimeMap = {
-  no: {},
-  scaleUp: {
-    scale: [1, 4],
-  },
-  shift: {
-    translateY: [-20, 0],
-    opacity: [0, 1],
-  },
-  contract: {
-    translateX: [20, 0],
-    opacity: [0, 1],
-  },
-};
-
-const outAnimeMap = {
-  no: {},
-  glossyBlur: {
-    filter: ['blur(0)', 'blur(4px)'],
-    scale: [1, 4],
-    opacity: [1, 0],
-  },
+const typeMap = {
+  word: ['hello', ' ', 'world'],
+  text: ['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'],
 };
 
 interface AnimeState {
   type?: string;
+  content?: Array<string>;
   inAnime?: InAnimeType;
   outAnime?: OutAnimeType;
   duration: number;
@@ -37,7 +19,8 @@ interface AnimeState {
 }
 
 const initialState: AnimeState = {
-  type: '.word-dom',
+  type: 'word',
+  content: ['hello', ' ', 'world'],
   inAnime: 'no',
   outAnime: 'no',
   duration: 2,
@@ -52,46 +35,20 @@ export const animeStateSlice = createSlice({
   reducers: {
     updateType: (state, action) => {
       state.type = action.payload;
-      myAnime.setViewClass(action.payload as string);
-      myAnime.createAnimation();
+      state.content = typeMap[action.payload];
+      setTimeout(() => {
+        myAnime.createAnimation();
+      }, 0);
     },
     updateInAnime: (state, action) => {
       state.inAnime = action.payload;
       myAnime.setIntroName(action.payload as string);
       myAnime.createAnimation();
-
-      // const addParams = inAnimeMap[action.payload];
-
-      // TODO 外部不应该直接获取实际的动画实例，而是应该由 myAnime 代理
-      // const instance = myAnime.updateAnimeInstance({
-      //   targets: state.type === 'text' ? '.letters' : '.word-dom',
-      //   autoplay: false,
-      //   duration: state.duration * 1000,
-      //   easing: 'linear',
-      // });
-      // if (state.outAnime !== 'no') {
-      //   instance.add(addParams).add(outAnimeMap[state.outAnime]);
-      // } else {
-      //   instance.add(addParams);
-      // }
     },
     updateOutAnime: (state, action) => {
       state.outAnime = action.payload;
       myAnime.setOutroName(action.payload as string);
       myAnime.createAnimation();
-
-      // const addParams = outAnimeMap[action.payload];
-      // const instance = myAnime.updateAnimeInstance({
-      //   targets: state.type === 'text' ? '.letters' : '.word-dom',
-      //   autoplay: false,
-      //   duration: state.duration * 1000,
-      //   easing: 'linear',
-      // });
-      // if (state.inAnime !== 'no') {
-      //   instance.add(inAnimeMap[state.inAnime]).add(addParams);
-      // } else {
-      //   instance.add(addParams);
-      // }
     },
     updateDuration: (state, action) => {
       const totalDuration = state.inDuration + state.outDuration;
@@ -125,6 +82,7 @@ export const animeStateSlice = createSlice({
     },
     resetAnime(state) {
       state.type = initialState.type;
+      state.content = initialState.content;
       state.inAnime = initialState.inAnime;
       state.outAnime = initialState.outAnime;
       state.duration = initialState.duration;
@@ -137,7 +95,7 @@ export const animeStateSlice = createSlice({
 });
 
 export const {
-  updateType,
+  updateType: updateType,
   updateInAnime,
   updateOutAnime,
   updateDuration,

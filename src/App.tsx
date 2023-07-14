@@ -22,12 +22,14 @@ function App() {
 
   useEffect(() => {
     if (progress === 100) {
-      domRef.current?.removeAttribute('style');
+      Array.from(domRef.current.children).map((c) =>
+        c.removeAttribute('style')
+      );
     }
   }, [progress]);
 
   const onResetStyle = () => {
-    domRef.current?.removeAttribute('style');
+    Array.from(domRef.current.children).map((c) => c.removeAttribute('style'));
   };
 
   return (

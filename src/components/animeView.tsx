@@ -1,17 +1,19 @@
 import { Slider } from 'antd';
 import { myAnime } from '../utils/myAnimeObj';
-import { forwardRef, useState } from 'react';
+import { forwardRef } from 'react';
+import { useSelector } from 'react-redux';
 
 const AnimeView = forwardRef(({ progress }: { progress: number }, ref) => {
-  const [content, setContent] = useState(['hello ', 'world']);
+  const { content } = useSelector((state) => state.animeStore);
+
   return (
-    <div className="border border-gray-400 p-4">
-      <div className="w-96 h-96 border border-gray-400 flex justify-center items-center">
-        <div ref={ref} className="word-dom z-0">
-          {content.map((c) => (
-            <span className="anime-dom" key={c}>
-              {c}
-            </span>
+    <div className="border rounded-md border-gray-300 p-4">
+      <div className="w-96 h-96 flex justify-center items-center">
+        <div ref={ref} className="flex">
+          {content.map((c, index) => (
+            <div key={index} className="word-dom text-4xl z-0">
+              {c.replace(/\s/g, '\u00a0')}
+            </div>
           ))}
         </div>
       </div>

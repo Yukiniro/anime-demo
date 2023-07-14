@@ -12,7 +12,8 @@ type FieldsType = {
 const inAnimeMap: Record<string, anime.AnimeAnimParams> = {
   no: {},
   scaleUp: {
-    scale: [1, 4],
+    scale: [0, 1],
+    opacity: [0, 1],
   },
   shift: {
     translateY: [-20, 0],
@@ -28,7 +29,7 @@ const outAnimeMap: Record<string, anime.AnimeAnimParams> = {
   no: {},
   glossyBlur: {
     filter: ['blur(0)', 'blur(4px)'],
-    scale: [1, 4],
+    scale: [1, 2],
     opacity: [1, 0],
   },
 };
@@ -67,14 +68,14 @@ class MyAnime {
   }
 
   reset() {
-    this.myAnimeInstance?.remove(this.#viewClass);
-    this.myAnimeInstance = null;
     this.#duration = 2000;
     this.#introDuration = 1000;
     this.#outroDuration = 1000;
     this.#introName = 'no';
     this.#outroName = 'no';
     this.#viewClass = '.word-dom';
+    this.myAnimeInstance?.remove(this.#viewClass);
+    this.myAnimeInstance = null;
   }
 
   setDuration(duration: number) {
@@ -163,34 +164,35 @@ class MyAnime {
       outroName,
     } = this.#getFieldsParams();
     const animeInstance = anime.timeline({
+      targets: viewClass,
       autoplay: false,
       easing: 'linear',
       duration,
+      delay: (_, i) => {
+        return i * 100;
+      },
+      // delay: anime.stagger(200),
     });
 
     if (introName !== 'no' && outroName !== 'no') {
       return (this.myAnimeInstance = animeInstance
         .add({
-          targets: viewClass,
           duration: introDuration,
           ...inAnimeMap[introName as string],
         })
         .add({
-          targets: viewClass,
           duration: outroDuration,
           ...outAnimeMap[outroName as string],
         }));
     }
     if (introName !== 'no' && outroName === 'no') {
       return (this.myAnimeInstance = animeInstance.add({
-        targets: viewClass,
         duration: introDuration,
         ...inAnimeMap[introName as string],
       }));
     }
     if (introName === 'no' && outroName !== 'no') {
       return (this.myAnimeInstance = animeInstance.add({
-        targets: viewClass,
         duration: outroDuration,
         ...outAnimeMap[outroName as string],
       }));
