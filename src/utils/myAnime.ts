@@ -133,7 +133,7 @@ class MyAnime {
     };
   }
 
-  //todo: dom更新
+  //TODO 取代组件上的 dom 生成
   createView(): HTMLDivElement {
     const viewClass = this.getViewClass();
     const textWrapper = document.querySelector('.word-dom');

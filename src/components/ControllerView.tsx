@@ -31,6 +31,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   const [isPlay, setIsPlay] = useState(false);
 
   useEffect(() => {
+    // TODO 这里的逻辑是否增加一个在播放过程中？
     if ((inAnime === 'no' && outAnime === 'no') || progress === 100) {
       setIsPlay(false);
     }

@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 const AnimeView = forwardRef(({ progress }: { progress: number }, ref) => {
   const { content } = useSelector((state) => state.animeStore);
 
+
   return (
     <div className="border rounded-md border-gray-300 p-4">
       <div className="w-96 h-96 flex justify-center items-center">
@@ -18,7 +19,10 @@ const AnimeView = forwardRef(({ progress }: { progress: number }, ref) => {
         </div>
       </div>
       <Slider
+        // TODO 不建议直接在这里进行重置处理，而是修改 pogress 进行更新
         value={progress === 100 ? 0 : progress}
+
+        // TODO 同#1
         onChange={(v) => {
           myAnime.seek(v);
         }}
