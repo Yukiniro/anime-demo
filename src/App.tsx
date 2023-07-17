@@ -18,17 +18,23 @@ function App() {
     return () => {
       clearInterval(t);
     };
+
+    // TODO dispatch 应该作为依赖。当前场景不会存在问题，但是如果存在需要重新初始化 reducer 的业务就可能会由问题
   }, []);
 
   useEffect(() => {
     if (progress === 100) {
+      // TODO 这个处理建议作为文字对象的接口
       Array.from(domRef.current.children).map((c) =>
         c.removeAttribute('style')
       );
     }
   }, [progress]);
 
+  // TODO #1 作为 props 或者 effect 依赖的函数使用 useCallback 进行包裹
   const onResetStyle = () => {
+
+    // TODO 同#1。并且不应该存在两个完全一样的使用，应该进行提取
     Array.from(domRef.current.children).map((c) => c.removeAttribute('style'));
   };
 

@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { InAnimeType, OutAnimeType } from '../../components/ControllerView';
 import { myAnime } from '../../utils/myAnimeObj';
 
+// TODO word 和 text 不应该放在这里，而是在 type 改变后进行动画的计算
 const typeMap = {
   word: ['hello', ' ', 'world'],
   text: ['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'],
@@ -29,6 +30,8 @@ const initialState: AnimeState = {
   progress: 0,
 };
 
+
+// TODO 当前版本的 redux 中的 reducer 可以不是纯函数了吗？
 export const animeStateSlice = createSlice({
   name: 'animeState',
   initialState,
@@ -36,6 +39,9 @@ export const animeStateSlice = createSlice({
     updateType: (state, action) => {
       state.type = action.payload;
       state.content = typeMap[action.payload];
+
+      // TODO 是否需要 setTimeout。createAnimation 应该要在控制范围之内
+      // 如果说会被视图上的 dom 更新影响，那么应该考虑完善或者取消跟视图的联系
       setTimeout(() => {
         myAnime.createAnimation();
       }, 0);
@@ -95,7 +101,7 @@ export const animeStateSlice = createSlice({
 });
 
 export const {
-  updateType: updateType,
+  updateType,
   updateInAnime,
   updateOutAnime,
   updateDuration,
