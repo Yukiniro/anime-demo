@@ -31,11 +31,10 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   const [isPlay, setIsPlay] = useState(false);
 
   useEffect(() => {
-    // TODO 这里的逻辑是否增加一个在播放过程中？
-    if ((inAnime === 'no' && outAnime === 'no') || progress === 100) {
+    if (progress === 100 || myAnime.getPaused()) {
       setIsPlay(false);
     }
-  }, [inAnime, outAnime, progress]);
+  }, [progress]);
 
   const onTypeChange = (v: 'text' | 'word') => {
     dispatch(updateType(v));
@@ -63,6 +62,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
     if (inAnime === 'no' && outAnime === 'no') {
       return;
     }
+
     if (isPlay) {
       myAnime.pause();
     } else {

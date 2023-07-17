@@ -1,14 +1,21 @@
 import anime from 'animejs';
 
 type BaseType = string | null;
+type TypeTarget = 'text' | 'word';
+
 type FieldsType = {
+  type: TypeTarget;
   duration: number;
   introDuration: number;
   outroDuration: number;
   introName: BaseType;
   outroName: BaseType;
   viewClass: BaseType;
+  currentProcess: number;
+  animeRef: HTMLDivElement | null;
+  content: string;
 };
+
 const inAnimeMap: Record<string, anime.AnimeAnimParams> = {
   no: {},
   scaleUp: {
@@ -36,23 +43,31 @@ const outAnimeMap: Record<string, anime.AnimeAnimParams> = {
 
 class MyAnime {
   myAnimeInstance: anime.AnimeTimelineInstance | null;
+  #type;
   #duration;
   #introDuration;
   #outroDuration;
   #introName: BaseType;
   #outroName: BaseType;
   #viewClass: BaseType;
+  #currentProcess: number;
+  #animeRef: HTMLDivElement | null;
+  #content: string;
 
   constructor() {
     this.myAnimeInstance = anime.timeline({
       autoplay: false,
     });
+    this.#type = 'word';
     this.#duration = 2000;
     this.#introDuration = 1000;
     this.#outroDuration = 1000;
     this.#introName = 'no';
     this.#outroName = 'no';
     this.#viewClass = '.word-dom';
+    this.#currentProcess = 0;
+    this.#animeRef = null;
+    this.#content = '';
   }
 
   play() {
@@ -68,14 +83,16 @@ class MyAnime {
   }
 
   reset() {
+    this.seek(0);
+    this.clearDomStyle();
     this.#duration = 2000;
     this.#introDuration = 1000;
     this.#outroDuration = 1000;
     this.#introName = 'no';
     this.#outroName = 'no';
     this.#viewClass = '.word-dom';
-    this.myAnimeInstance?.remove(this.#viewClass);
     this.myAnimeInstance = null;
+    this.#currentProcess = 0;
   }
 
   setDuration(duration: number) {
@@ -124,37 +141,60 @@ class MyAnime {
 
   #getFieldsParams(): FieldsType {
     return {
+      type: this.#type,
       introDuration: this.#introDuration,
       outroDuration: this.#outroDuration,
       introName: this.#introName,
       outroName: this.#outroName,
       viewClass: this.#viewClass,
       duration: this.#duration,
+      currentProcess: this.#currentProcess,
+      animeRef: this.#animeRef,
     };
   }
 
-  //TODO 取代组件上的 dom 生成
-  createView(): HTMLDivElement {
-    const viewClass = this.getViewClass();
-    const textWrapper = document.querySelector('.word-dom');
-
-    if (viewClass === '.text-dom') {
-      textWrapper.innerHTML = textWrapper.textContent.replace(
-        /\S/g,
-        "<span class='letter'>$&</span>"
-      );
-    } else {
-      const letters = document.querySelectorAll('.letter');
-      let str = '';
-      letters.forEach((letter) => {
-        str += letter.innerText;
-      });
-      textWrapper.innerText = str;
+  removeElement() {
+    if (this.#animeRef) {
+      this.#animeRef.innerHTML = '';
     }
-    return textWrapper as HTMLDivElement;
+  }
+
+  addToView(type: TypeTarget) {
+    const els = this.createView(type);
+    this.#animeRef?.append(...els);
+  }
+
+  //TODO 取代组件上的 dom 生成
+  createView(type: TypeTarget) {
+    let els: HTMLElement[] = [];
+    if (type === 'word') {
+      els = ['hello', '\u00a0', 'world'].map((o) => {
+        const element = document.createElement('div');
+        element.classList.add('word-dom');
+        element.innerText = o;
+        return element;
+      });
+    } else {
+      els = ['h', 'e', 'l', 'l', 'o', '\u00a0', 'w', 'o', 'r', 'l', 'd'].map(
+        (o) => {
+          const element = document.createElement('div');
+          element.classList.add('word-dom');
+          element.innerText = o;
+          return element;
+        }
+      );
+    }
+    return els;
+  }
+
+  clearDomStyle() {
+    Array.from(this.#animeRef?.childNodes).map((c) =>
+      c.removeAttribute('style')
+    );
   }
 
   createAnimation(): anime.AnimeTimelineInstance {
+    const _self = this;
     const {
       viewClass,
       duration,
@@ -163,44 +203,45 @@ class MyAnime {
       introName,
       outroName,
     } = this.#getFieldsParams();
+
     const animeInstance = anime.timeline({
       targets: viewClass,
       autoplay: false,
       easing: 'linear',
       duration,
+      update(anim) {
+        _self.setCurrentProcess(Math.round(anim.progress));
+      },
       delay: (_, i) => {
         return i * 100;
       },
-      // delay: anime.stagger(200),
     });
 
-    if (introName !== 'no' && outroName !== 'no') {
-      return (this.myAnimeInstance = animeInstance
-        .add({
-          duration: introDuration,
-          ...inAnimeMap[introName as string],
-        })
-        .add({
-          duration: outroDuration,
-          ...outAnimeMap[outroName as string],
-        }));
-    }
-    if (introName !== 'no' && outroName === 'no') {
-      return (this.myAnimeInstance = animeInstance.add({
+    return (this.myAnimeInstance = animeInstance
+      .add({
         duration: introDuration,
         ...inAnimeMap[introName as string],
-      }));
-    }
-    if (introName === 'no' && outroName !== 'no') {
-      return (this.myAnimeInstance = animeInstance.add({
+      })
+      .add({
         duration: outroDuration,
         ...outAnimeMap[outroName as string],
       }));
-    }
+  }
+
+  setCurrentProcess(process: number) {
+    this.#currentProcess = process;
+  }
+
+  setAnimeRef(animeRef: HTMLDivElement | null) {
+    this.#animeRef = animeRef;
   }
 
   currentProgress(): number {
-    return this.myAnimeInstance?.progress as number;
+    return this.#currentProcess;
+  }
+
+  getPaused(): boolean {
+    return this.myAnimeInstance?.paused as boolean;
   }
 }
 

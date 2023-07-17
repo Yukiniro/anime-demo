@@ -2,13 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { InAnimeType, OutAnimeType } from '../../components/ControllerView';
 import { myAnime } from '../../utils/myAnimeObj';
 
-// TODO word 和 text 不应该放在这里，而是在 type 改变后进行动画的计算
-const typeMap = {
-  word: ['hello', ' ', 'world'],
-  text: ['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'],
-};
-
-interface AnimeState {
+export interface AnimeState {
   type?: string;
   content?: Array<string>;
   inAnime?: InAnimeType;
@@ -17,6 +11,7 @@ interface AnimeState {
   inDuration?: number;
   outDuration?: number;
   progress?: number;
+  eleRef?: HTMLDivElement | null;
 }
 
 const initialState: AnimeState = {
@@ -28,23 +23,18 @@ const initialState: AnimeState = {
   inDuration: 1,
   outDuration: 1,
   progress: 0,
+  eleRef: null,
 };
 
-
-// TODO 当前版本的 redux 中的 reducer 可以不是纯函数了吗？
 export const animeStateSlice = createSlice({
   name: 'animeState',
   initialState,
   reducers: {
     updateType: (state, action) => {
       state.type = action.payload;
-      state.content = typeMap[action.payload];
-
-      // TODO 是否需要 setTimeout。createAnimation 应该要在控制范围之内
-      // 如果说会被视图上的 dom 更新影响，那么应该考虑完善或者取消跟视图的联系
-      setTimeout(() => {
-        myAnime.createAnimation();
-      }, 0);
+      myAnime.removeElement();
+      myAnime.addToView(action.payload);
+      myAnime.createAnimation();
     },
     updateInAnime: (state, action) => {
       state.inAnime = action.payload;
@@ -85,6 +75,7 @@ export const animeStateSlice = createSlice({
     },
     updateProgress: (state, action) => {
       state.progress = action.payload;
+      myAnime.setCurrentProcess(action.payload);
     },
     resetAnime(state) {
       state.type = initialState.type;
