@@ -31,6 +31,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   const [isPlay, setIsPlay] = useState(false);
 
   useEffect(() => {
+    // TODO 这里应该是触发暂停，而不是修复播放状态
     if (progress === 100 || myAnime.getPaused()) {
       setIsPlay(false);
     }

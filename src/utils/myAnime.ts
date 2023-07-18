@@ -161,6 +161,7 @@ class MyAnime {
   }
 
   addToView() {
+    // TODO 这里的实现不应该包含 createView
     const els = this.createView();
     this.#animeRef?.append(...els);
   }
