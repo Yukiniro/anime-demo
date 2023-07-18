@@ -13,7 +13,7 @@ function App() {
 
   useEffect(() => {
     myAnime.setAnimeRef(domRef.current);
-    myAnime.addToView('word');
+    myAnime.addToView();
     return () => myAnime.removeElement();
   }, []);
 

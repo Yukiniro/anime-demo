@@ -32,6 +32,7 @@ export const animeStateSlice = createSlice({
   reducers: {
     updateType: (state, action) => {
       state.type = action.payload;
+      myAnime.setType(action.payload);
       myAnime.removeElement();
       myAnime.addToView(action.payload);
       myAnime.createAnimation();

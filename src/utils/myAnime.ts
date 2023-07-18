@@ -43,7 +43,7 @@ const outAnimeMap: Record<string, anime.AnimeAnimParams> = {
 
 class MyAnime {
   myAnimeInstance: anime.AnimeTimelineInstance | null;
-  #type;
+  #type: TypeTarget;
   #duration;
   #introDuration;
   #outroDuration;
@@ -67,7 +67,7 @@ class MyAnime {
     this.#viewClass = '.word-dom';
     this.#currentProcess = 0;
     this.#animeRef = null;
-    this.#content = '';
+    this.#content = 'hello world';
   }
 
   play() {
@@ -150,6 +150,7 @@ class MyAnime {
       duration: this.#duration,
       currentProcess: this.#currentProcess,
       animeRef: this.#animeRef,
+      content: this.#content,
     };
   }
 
@@ -159,31 +160,31 @@ class MyAnime {
     }
   }
 
-  addToView(type: TypeTarget) {
-    const els = this.createView(type);
+  addToView() {
+    const els = this.createView();
     this.#animeRef?.append(...els);
   }
 
-  //TODO 取代组件上的 dom 生成
-  createView(type: TypeTarget) {
+  createView() {
     let els: HTMLElement[] = [];
-    if (type === 'word') {
-      els = ['hello', '\u00a0', 'world'].map((o) => {
-        const element = document.createElement('div');
-        element.classList.add('word-dom');
-        element.innerText = o;
-        return element;
-      });
+    let newContent = [];
+    if (this.#type === 'word') {
+      newContent = this.#content.split(/(\s+)/);
     } else {
-      els = ['h', 'e', 'l', 'l', 'o', '\u00a0', 'w', 'o', 'r', 'l', 'd'].map(
-        (o) => {
-          const element = document.createElement('div');
-          element.classList.add('word-dom');
-          element.innerText = o;
-          return element;
-        }
-      );
+      const newArr: string[][] = [];
+      this.#content.split(/(\s+)/).map((c) => {
+        return newArr.push(c.split(''));
+      });
+      newContent = newArr.flat();
     }
+
+    els = newContent.map((o) => {
+      const element = document.createElement('div');
+      element.classList.add('word-dom');
+      element.innerText = o === ' ' ? '\u00a0' : o;
+      return element;
+    });
+
     return els;
   }
 
@@ -234,6 +235,10 @@ class MyAnime {
 
   setAnimeRef(animeRef: HTMLDivElement | null) {
     this.#animeRef = animeRef;
+  }
+
+  setType(type: TypeTarget) {
+    this.#type = type;
   }
 
   currentProgress(): number {
