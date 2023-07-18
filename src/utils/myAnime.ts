@@ -14,6 +14,7 @@ type FieldsType = {
   currentProcess: number;
   animeRef: HTMLDivElement | null;
   content: string;
+  completed: boolean;
 };
 
 const inAnimeMap: Record<string, anime.AnimeAnimParams> = {
@@ -36,7 +37,7 @@ const outAnimeMap: Record<string, anime.AnimeAnimParams> = {
   no: {},
   glossyBlur: {
     filter: ['blur(0)', 'blur(4px)'],
-    scale: [1, 2],
+    scale: [1, 1.5],
     opacity: [1, 0],
   },
 };
@@ -50,9 +51,11 @@ class MyAnime {
   #introName: BaseType;
   #outroName: BaseType;
   #viewClass: BaseType;
-  #currentProcess: number;
+  #currentProgress: number;
   #animeRef: HTMLDivElement | null;
   #content: string;
+  #completed: boolean;
+  #delayTime: number;
 
   constructor() {
     this.myAnimeInstance = anime.timeline({
@@ -65,24 +68,32 @@ class MyAnime {
     this.#introName = 'no';
     this.#outroName = 'no';
     this.#viewClass = '.word-dom';
-    this.#currentProcess = 0;
+    this.#currentProgress = 0;
     this.#animeRef = null;
     this.#content = 'hello world';
+    this.#completed = false;
+    this.#delayTime = 100;
   }
 
   play() {
     this.myAnimeInstance?.play();
   }
 
-  seek(number: number) {
-    this.myAnimeInstance?.seek(this.myAnimeInstance.duration * (number / 100));
+  seek(val: number) {
+    let delayTotal = 0;
+    if (this.#animeRef) {
+      delayTotal = this.#animeRef.childNodes.length * this.#delayTime;
+    }
+    this.myAnimeInstance?.reset();
+    this.myAnimeInstance?.seek((this.#duration + delayTotal) * (val / 100));
   }
 
   pause() {
     this.myAnimeInstance?.pause();
   }
 
-  reset() {
+  myReset() {
+    this.pause();
     this.seek(0);
     this.clearDomStyle();
     this.#duration = 2000;
@@ -92,7 +103,7 @@ class MyAnime {
     this.#outroName = 'no';
     this.#viewClass = '.word-dom';
     this.myAnimeInstance = null;
-    this.#currentProcess = 0;
+    this.#currentProgress = 0;
   }
 
   setDuration(duration: number) {
@@ -148,9 +159,10 @@ class MyAnime {
       outroName: this.#outroName,
       viewClass: this.#viewClass,
       duration: this.#duration,
-      currentProcess: this.#currentProcess,
+      currentProcess: this.#currentProgress,
       animeRef: this.#animeRef,
       content: this.#content,
+      completed: this.#completed,
     };
   }
 
@@ -160,10 +172,10 @@ class MyAnime {
     }
   }
 
-  addToView() {
-    // TODO 这里的实现不应该包含 createView
-    const els = this.createView();
-    this.#animeRef?.append(...els);
+  addToView(els: HTMLElement[]): void {
+    if (this.#animeRef) {
+      this.#animeRef.append(...els);
+    }
   }
 
   createView() {
@@ -195,7 +207,7 @@ class MyAnime {
     );
   }
 
-  createAnimation(): anime.AnimeTimelineInstance {
+  createAnimation() {
     const _self = this;
     const {
       viewClass,
@@ -210,16 +222,17 @@ class MyAnime {
       targets: viewClass,
       autoplay: false,
       easing: 'linear',
-      duration,
+      duration: duration,
       update(anim) {
-        _self.setCurrentProcess(Math.round(anim.progress));
+        _self.setCurrentProgress(Math.round(anim.progress));
       },
-      delay: (_, i) => {
-        return i * 100;
+      complete(anim) {
+        _self.setCompleted(anim.completed);
       },
+      delay: anime.stagger(_self.#delayTime, { start: 0 }),
     });
 
-    return (this.myAnimeInstance = animeInstance
+    this.myAnimeInstance = animeInstance
       .add({
         duration: introDuration,
         ...inAnimeMap[introName as string],
@@ -227,11 +240,19 @@ class MyAnime {
       .add({
         duration: outroDuration,
         ...outAnimeMap[outroName as string],
-      }));
+      });
   }
 
-  setCurrentProcess(process: number) {
-    this.#currentProcess = process;
+  setCompleted(completed: boolean) {
+    this.#completed = completed;
+  }
+
+  getCompleted(): boolean {
+    return this.#completed;
+  }
+
+  setCurrentProgress(process: number) {
+    this.#currentProgress = process;
   }
 
   setAnimeRef(animeRef: HTMLDivElement | null) {
@@ -243,7 +264,7 @@ class MyAnime {
   }
 
   currentProgress(): number {
-    return this.#currentProcess;
+    return this.#currentProgress;
   }
 
   getPaused(): boolean {

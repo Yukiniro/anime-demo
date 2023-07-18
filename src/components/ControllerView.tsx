@@ -8,9 +8,8 @@ import {
   updateInDuration,
   updateOutDuration,
   resetAnime,
+  updateIsPlaying,
 } from '../features/anime/animeSlice';
-import { myAnime } from '../utils/myAnimeObj';
-import { useState, useEffect } from 'react';
 
 export type InAnimeType = 'scaleUp' | 'shift' | 'contract' | 'no';
 export type OutAnimeType = 'glossyBlur' | 'no';
@@ -23,19 +22,10 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
     duration,
     inDuration,
     outDuration,
-    progress,
+    isPlaying,
   } = useSelector((state) => state.animeStore);
 
   const dispatch = useDispatch();
-
-  const [isPlay, setIsPlay] = useState(false);
-
-  useEffect(() => {
-    // TODO 这里应该是触发暂停，而不是修复播放状态
-    if (progress === 100 || myAnime.getPaused()) {
-      setIsPlay(false);
-    }
-  }, [progress]);
 
   const onTypeChange = (v: 'text' | 'word') => {
     dispatch(updateType(v));
@@ -60,16 +50,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   };
 
   const onStart = () => {
-    if (inAnime === 'no' && outAnime === 'no') {
-      return;
-    }
-
-    if (isPlay) {
-      myAnime.pause();
-    } else {
-      myAnime.play();
-    }
-    setIsPlay(!isPlay);
+    dispatch(updateIsPlaying({ play: !isPlaying }));
   };
 
   const onReset = () => {
@@ -153,7 +134,7 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
           className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded"
           onClick={onStart}
         >
-          {isPlay ? '暂停' : '播放'}
+          {isPlaying ? '暂停' : '播放'}
         </button>
         <button
           className="bg-white hover:bg-gray-100 text-gray-800 py-1 px-4 border border-gray-400 rounded shadow"

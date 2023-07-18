@@ -1,20 +1,13 @@
 import { Slider } from 'antd';
 import { forwardRef, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { updateProgress } from '../features/anime/animeSlice';
 import { myAnime } from '../utils/myAnimeObj';
 
 const AnimeView = forwardRef(({ progress }: { progress: number }, ref) => {
-  const dispatch = useDispatch();
-
-  const onSliderChange = useCallback(
-    (v: number) => {
-      myAnime.pause();
-      myAnime.seek(v);
-      dispatch(updateProgress(v));
-    },
-    [dispatch]
-  );
+  const onSliderChange = useCallback((v: number) => {
+    myAnime.pause();
+    myAnime.setCurrentProgress(v);
+    myAnime.seek(v);
+  }, []);
 
   return (
     <div className="border rounded-md border-gray-300 p-4">

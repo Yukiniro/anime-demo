@@ -4,7 +4,7 @@ import { myAnime } from './utils/myAnimeObj';
 import { useDispatch, useSelector } from 'react-redux';
 import ControllerView from './components/ControllerView';
 import AnimeView from './components/AnimeView';
-import { updateProgress } from './features/anime/animeSlice';
+import { updateIsPlaying, updateProgress } from './features/anime/animeSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -13,24 +13,20 @@ function App() {
 
   useEffect(() => {
     myAnime.setAnimeRef(domRef.current);
-    myAnime.addToView();
+    myAnime.addToView(myAnime.createView());
     return () => myAnime.removeElement();
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => {
+    function repeatOften() {
       dispatch(updateProgress(myAnime.currentProgress()));
-    }, 2);
-    return () => {
-      clearInterval(t);
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (progress === 100) {
-      myAnime.clearDomStyle();
+      if (myAnime.getPaused()) {
+        dispatch(updateIsPlaying({ isPlaying: false }));
+      }
+      requestAnimationFrame(repeatOften);
     }
-  }, [progress]);
+    requestAnimationFrame(repeatOften);
+  }, [dispatch]);
 
   const onResetStyle = useCallback(() => {
     myAnime.clearDomStyle();
