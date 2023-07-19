@@ -1,4 +1,4 @@
-import { InputNumber, Select } from 'antd';
+import { InputNumber, Select, message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   updateType,
@@ -50,6 +50,9 @@ const ControllerView = ({ onResetStyle }: { onResetStyle: () => void }) => {
   };
 
   const onStart = () => {
+    if (inAnime === 'no' && outAnime === 'no') {
+      message.warning('请先选择动画');
+    }
     dispatch(updateIsPlaying({ play: !isPlaying }));
   };
 

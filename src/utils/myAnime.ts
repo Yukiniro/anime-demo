@@ -80,10 +80,9 @@ class MyAnime {
   }
 
   seek(val: number) {
-    let delayTotal = 0;
-    if (this.#animeRef) {
-      delayTotal = this.#animeRef.childNodes.length * this.#delayTime;
-    }
+    let delayTotal = this.#animeRef
+      ? (this.#animeRef.childNodes.length - 1) * this.#delayTime
+      : 0;
     this.myAnimeInstance?.reset();
     this.myAnimeInstance?.seek((this.#duration + delayTotal) * (val / 100));
   }
@@ -229,7 +228,9 @@ class MyAnime {
       complete(anim) {
         _self.setCompleted(anim.completed);
       },
-      delay: anime.stagger(_self.#delayTime, { start: 0 }),
+      delay(_, i) {
+        return i * 100;
+      },
     });
 
     this.myAnimeInstance = animeInstance
